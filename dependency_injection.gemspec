@@ -15,7 +15,4 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
 
   spec.add_dependency('activesupport')
-  spec.add_development_dependency('coveralls')
-  spec.add_development_dependency('minitest')
-  spec.add_development_dependency('mocha')
 end

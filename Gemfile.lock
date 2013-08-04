@@ -24,6 +24,7 @@ GEM
     mocha (0.14.0)
       metaclass (~> 0.0.1)
     multi_json (1.7.8)
+    rake (10.1.0)
     rest-client (1.6.7)
       mime-types (>= 1.16)
     simplecov (0.7.1)
@@ -40,3 +41,4 @@ DEPENDENCIES
   dependency_injection!
   minitest
   mocha
+  rake
