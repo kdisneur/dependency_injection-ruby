@@ -1,12 +1,12 @@
-require 'dependency_injection/dependency'
+require 'dependency_injection/definition'
 
 module DependencyInjection
   class Container
-    attr_reader :dependencies, :parameters
+    attr_reader :definitions, :parameters
 
     def initialize
-      @dependencies = {}
-      @parameters   = {}
+      @definitions = {}
+      @parameters  = {}
     end
 
     def add_parameter(name, value)
@@ -14,13 +14,13 @@ module DependencyInjection
     end
 
     def get(name)
-      if (dependency = @dependencies[name])
-        dependency.object
+      if (definition = @definitions[name])
+        definition.object
       end
     end
 
     def register(name, klass_name)
-      @dependencies[name] = Dependency.new(klass_name, self)
+      @definitions[name] = Definition.new(klass_name, self)
     end
   end
 end
