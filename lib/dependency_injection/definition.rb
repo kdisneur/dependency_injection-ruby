@@ -2,13 +2,13 @@ require 'active_support/core_ext/string/inflections'
 
 module DependencyInjection
   class Definition
-    attr_reader :klass_name, :arguments, :method_calls
+    attr_accessor :klass_name, :arguments, :method_calls
 
     def initialize(klass_name, container)
-      @arguments    = []
-      @container    = container
-      @klass_name   = klass_name
-      @method_calls = {}
+      @container        = container
+      self.arguments    = []
+      self.klass_name   = klass_name
+      self.method_calls = {}
     end
 
     def add_argument(argument)
@@ -16,13 +16,13 @@ module DependencyInjection
     end
 
     def add_arguments(*arguments)
-      @arguments += arguments
+      self.arguments += arguments
 
       self
     end
 
     def add_method_call(method_name, *arguments)
-      @method_calls[method_name] = arguments
+      self.method_calls[method_name] = arguments
 
       self
     end
@@ -33,6 +33,7 @@ module DependencyInjection
 
     def object
       return @object if @object
+
       @object = self.klass.new(*resolve(self.arguments))
       self.method_calls.each { |method_name, arguments| @object.send(method_name, *resolve(arguments)) }
 
