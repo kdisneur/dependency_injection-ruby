@@ -8,8 +8,8 @@ class TestContainer < Minitest::Test
     @dependency_object  = mock
     @dependency_object.stubs(:object).returns(@final_object)
     @another_dependency_object = mock
-    DependencyInjection::Dependency.stubs(:new).with('MyDependency').returns(@dependency_object)
-    DependencyInjection::Dependency.stubs(:new).with('MyOtherDependency').returns(@another_dependency_object)
+    DependencyInjection::Dependency.stubs(:new).with('MyDependency', @container).returns(@dependency_object)
+    DependencyInjection::Dependency.stubs(:new).with('MyOtherDependency', @container).returns(@another_dependency_object)
   end
 
   def test_getting_a_registered_dependency_returns_an_object

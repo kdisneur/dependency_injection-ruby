@@ -15,7 +15,7 @@ module DependencyInjection
     end
 
     def register(name, klass_name)
-      @dependencies[name] = Dependency.new(klass_name)
+      @dependencies[name] = Dependency.new(klass_name, self)
     end
   end
 end
