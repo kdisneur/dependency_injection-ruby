@@ -1,3 +1,4 @@
+require 'dependency_injection/alias_definition'
 require 'dependency_injection/definition'
 
 module DependencyInjection
@@ -21,6 +22,10 @@ module DependencyInjection
 
     def register(name, klass_name)
       @definitions[name] = Definition.new(klass_name, self)
+    end
+
+    def register_alias(name, alias_definition_name)
+      @definitions[name] = AliasDefinition.new(alias_definition_name, self)
     end
   end
 end
