@@ -4,8 +4,9 @@ module DependencyInjection
   class Dependency
     attr_reader :klass_name, :arguments, :method_calls
 
-    def initialize(klass_name)
+    def initialize(klass_name, container)
       @arguments    = []
+      @container    = container
       @klass_name   = klass_name
       @method_calls = {}
     end
@@ -32,10 +33,22 @@ module DependencyInjection
 
     def object
       return @object if @object
-      @object = self.klass.new(*self.arguments)
-      self.method_calls.each { |method_name, arguments| @object.send(method_name, *arguments) }
+      @object = self.klass.new(*resolve_references(self.arguments))
+      self.method_calls.each { |method_name, arguments| @object.send(method_name, *resolve_references(arguments)) }
 
       @object
+    end
+
+  private
+
+    def resolve_references(arguments)
+      arguments.map do |argument|
+        if /^@(?<reference_name>.*)/ =~ argument
+          @container.get(reference_name)
+        else
+          argument
+        end
+      end
     end
   end
 end

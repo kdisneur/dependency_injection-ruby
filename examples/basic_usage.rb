@@ -61,4 +61,3 @@ end
 c.register('mailer', 'Mailer').add_argument('jon@doe.com').add_method_call('transport=', 'send_mail')
 c.get('mailer').send_mail('Hello World')
 # => mail sent by jon@doe.com via send_mail: Hello World
-

@@ -3,7 +3,8 @@ require 'dependency_injection/dependency'
 
 class TestDependency < Minitest::Test
   def setup
-    @dependency = DependencyInjection::Dependency.new('MyClass')
+    @container  = mock
+    @dependency = DependencyInjection::Dependency.new('MyClass', @container)
   end
 
   def test_adding_an_argument
@@ -90,5 +91,16 @@ class TestDependency < Minitest::Test
     @dependency.add_method_call('method_2', 'value')
 
     @dependency.object
+  end
+
+  def test_resolving_references_without_references
+    assert_equal(%w(first second), @dependency.send(:resolve_references, %w(first second)))
+  end
+
+  def test_resolving_references_with_references
+    referenced_object = mock
+    @container.stubs(:get).with('reference.name').returns(referenced_object)
+
+    assert_equal(['first', referenced_object], @dependency.send(:resolve_references, %w(first @reference.name)))
   end
 end
