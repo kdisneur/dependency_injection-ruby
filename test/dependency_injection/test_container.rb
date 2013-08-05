@@ -3,13 +3,13 @@ require 'dependency_injection/container'
 
 class TestContainer < Minitest::Test
   def setup
-    @container          = DependencyInjection::Container.new
-    @final_object       = mock
-    @dependency_object  = mock
-    @dependency_object.stubs(:object).returns(@final_object)
-    @another_dependency_object = mock
-    DependencyInjection::Dependency.stubs(:new).with('MyDependency', @container).returns(@dependency_object)
-    DependencyInjection::Dependency.stubs(:new).with('MyOtherDependency', @container).returns(@another_dependency_object)
+    @container    = DependencyInjection::Container.new
+    @final_object = mock
+    @definition   = mock
+    @definition.stubs(:object).returns(@final_object)
+    @another_definition = mock
+    DependencyInjection::Definition.stubs(:new).with('MyDefinition', @container).returns(@definition)
+    DependencyInjection::Definition.stubs(:new).with('MyOtherDefinition', @container).returns(@another_definition)
   end
 
   def test_adding_new_parameter
@@ -25,30 +25,30 @@ class TestContainer < Minitest::Test
     assert_equal({ 'my.parameter' => 'other value' }, @container.parameters)
   end
 
-  def test_getting_a_registered_dependency_returns_an_object
-    @container.register('my_dependency', 'MyDependency')
-    assert_equal(@final_object, @container.get('my_dependency'))
+  def test_getting_a_registered_definition_returns_an_object
+    @container.register('my_definition', 'MyDefinition')
+    assert_equal(@final_object, @container.get('my_definition'))
   end
 
-  def test_getting_a_not_registered_dependency_returns_nil
-    assert_equal(nil, @container.get('my_dependency'))
+  def test_getting_a_not_registered_definition_returns_nil
+    assert_equal(nil, @container.get('my_definition'))
   end
 
-  def test_registering_a_dependency
-    @container.register('my_dependency', 'MyDependency')
+  def test_registering_a_definition
+    @container.register('my_definition', 'MyDefinition')
 
-    assert_equal({ 'my_dependency' => @dependency_object }, @container.dependencies)
+    assert_equal({ 'my_definition' => @definition }, @container.definitions)
   end
 
-  def test_registering_a_class_return_a_dependency_object
-    assert_equal(@dependency_object, @container.register('my_dependency', 'MyDependency'))
+  def test_registering_a_class_return_a_definition_object
+    assert_equal(@definition, @container.register('my_definition', 'MyDefinition'))
   end
 
-  def test_registering_an_already_existing_dependency_replace_it
-    @container.register('my_dependency', 'MyDependency')
-    assert_equal({ 'my_dependency' => @dependency_object }, @container.dependencies)
+  def test_registering_an_already_existing_definition_replace_it
+    @container.register('my_definition', 'MyDefinition')
+    assert_equal({ 'my_definition' => @definition }, @container.definitions)
 
-    @container.register('my_dependency', 'MyOtherDependency')
-    assert_equal({ 'my_dependency' => @another_dependency_object }, @container.dependencies)
+    @container.register('my_definition', 'MyOtherDefinition')
+    assert_equal({ 'my_definition' => @another_definition }, @container.definitions)
   end
 end

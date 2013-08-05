@@ -1,7 +1,7 @@
 require 'active_support/core_ext/string/inflections'
 
 module DependencyInjection
-  class Dependency
+  class Definition
     attr_reader :klass_name, :arguments, :method_calls
 
     def initialize(klass_name, container)
