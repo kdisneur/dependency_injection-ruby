@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.version       = DependencyInjection::VERSION
   spec.summary       = 'Dependency Injection system for Ruby'
   spec.description   = 'A fully customizable Dependency injection system for Ruby'
-  spec.homepage      = 'https://github.com/kdisneur/dependency_injection'
+  spec.homepage      = 'https://github.com/kdisneur/dependency_injection-ruby'
   spec.license       = 'MIT'
   spec.authors       = ['Kevin Disneur']
   spec.email         = 'kevin@koboyz.org'
