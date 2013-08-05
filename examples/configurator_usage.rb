@@ -3,16 +3,15 @@ require 'dependency_injection/loaders/yaml'
 
 c = DependencyInjection::Container.new
 loader = DependencyInjection::Loaders::Yaml.new(c)
-loader.load(File.join(File.dirname(File.expand_path(__FILE__)), 'yaml_configuration_file.yml'))
+loader.load(File.join(File.dirname(File.expand_path(__FILE__)), 'configurator_usage.yml'))
 
-class NewsletterManager
-  def initialize(mailer)
-    @mailer = mailer
+class MailerConfigurator
+  def initialize(transport)
+    @transport = transport
   end
 
-  def send_mail(message)
-    puts 'newletter'
-    @mailer.send_mail(message)
+  def configure(mailer)
+    mailer.transport = @transport
   end
 end
 
@@ -24,6 +23,5 @@ class Mailer
   end
 end
 
-c.get('newsletter').send_mail('Hello World')
-# => newletter
+c.get('my.mailer').send_mail('Hello World')
 #    mail sent via sendmail: Hello World

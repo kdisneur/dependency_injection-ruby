@@ -1,0 +1,10 @@
+parameters:
+  mailer.transport: sendmail
+services:
+  mailer_configurator:
+    class: MailerConfigurator
+    arguments:
+      - '%mailer.transport%'
+  my.mailer:
+    class: Mailer
+    configurator: ['@mailer_configurator', 'configure']

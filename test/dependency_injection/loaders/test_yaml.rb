@@ -85,4 +85,20 @@ class TestYaml < Minitest::Test
                                                                                   'method_2' => ['arg_1', 'arg_2'],
                                                                                   'method_3' => [['arg_1', 'arg_2']] }})
   end
+
+  def test_adding_service_without_configurator
+    definition = mock
+    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    definition.expects(:add_configurator).never
+
+    @yaml_loader.send(:add_service, 'key_1', { 'class' => 'MyKlass' })
+  end
+
+  def test_adding_service_with_configurator
+    definition = mock
+    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    definition.expects(:add_configurator).with('ConfiguratorKlass', 'method_name')
+
+    @yaml_loader.send(:add_service, 'key_1', { 'class' => 'MyKlass', 'configurator' => ['ConfiguratorKlass', 'method_name'] })
+  end
 end
