@@ -1,0 +1,8 @@
+services:
+  my.mailer:
+    class: Mailer
+    lazy: true
+  my.newsletter_manager:
+    class: NewsletterManager
+    arguments:
+      - '@my.mailer'

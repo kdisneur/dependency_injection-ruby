@@ -1,4 +1,6 @@
+require 'dependency_injection/alias_definition'
 require 'dependency_injection/definition'
+require 'dependency_injection/lazy_definition'
 
 module DependencyInjection
   class Container
@@ -19,8 +21,13 @@ module DependencyInjection
       end
     end
 
-    def register(name, klass_name)
-      @definitions[name] = Definition.new(klass_name, self)
+    def register(name, klass_name, lazy=false)
+      definition = lazy ? LazyDefinition.new(klass_name, self) : Definition.new(klass_name, self)
+      @definitions[name] =definition
+    end
+
+    def register_alias(name, alias_definition_name)
+      @definitions[name] = AliasDefinition.new(alias_definition_name, self)
     end
   end
 end

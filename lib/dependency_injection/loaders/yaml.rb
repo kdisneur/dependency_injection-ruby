@@ -15,6 +15,10 @@ module DependencyInjection
 
     private
 
+      def add_aliased_service(name, aliased_service_name)
+        @container.register_alias(name, aliased_service_name)
+      end
+
       def add_parameters(parameters)
         parameters.each { |name, value| @container.add_parameter(name, value) }
       end
@@ -24,8 +28,20 @@ module DependencyInjection
       end
 
       def add_service(name, parameters)
-        definition = @container.register(name, parameters['class'])
+        if parameters['alias']
+          add_aliased_service(name, parameters['alias'])
+        else
+          add_standard_service(name, parameters)
+        end
+      end
+
+      def add_standard_service(name, parameters)
+        lazy_load  = parameters['lazy'] || false
+        definition = @container.register(name, parameters['class'], lazy_load)
         definition.add_arguments(*parameters['arguments']) if parameters['arguments']
+        if (configurator = parameters['configurator'])
+          definition.add_configurator(configurator[0], configurator[1])
+        end
         if parameters['calls']
           parameters['calls'].each { |method_name, arguments| definition.add_method_call(method_name, *arguments) }
         end
