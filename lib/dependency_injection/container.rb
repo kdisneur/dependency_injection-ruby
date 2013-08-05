@@ -2,10 +2,15 @@ require 'dependency_injection/dependency'
 
 module DependencyInjection
   class Container
-    attr_reader :dependencies
+    attr_reader :dependencies, :parameters
 
     def initialize
       @dependencies = {}
+      @parameters   = {}
+    end
+
+    def add_parameter(name, value)
+      @parameters[name] = value
     end
 
     def get(name)
