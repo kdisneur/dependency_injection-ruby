@@ -93,6 +93,34 @@ class TestDependency < Minitest::Test
     @dependency.object
   end
 
+  def test_resolving_first_container_parameters
+    changed_arguments = mock
+    arguments         = mock
+    @dependency.stubs(:resolve_references).returns(changed_arguments)
+    @dependency.expects(:resolve_container_parameters).with(arguments)
+
+    @dependency.send(:resolve, arguments)
+  end
+
+  def test_resolving_references_after_container_parameters
+    changed_arguments = mock
+    arguments         = mock
+    @dependency.stubs(:resolve_container_parameters).with(arguments).returns(changed_arguments)
+    @dependency.expects(:resolve_references).with(changed_arguments)
+
+    @dependency.send(:resolve, arguments)
+  end
+
+  def test_resolving_container_parameters_without_parameters
+    assert_equal(%w(first, second), @dependency.send(:resolve_container_parameters, %w(first, second)))
+  end
+
+  def test_resolving_container_parameters_with_parameters
+    @container.stubs(:parameters).returns({ 'parameter' => 'value' })
+
+    assert_equal(['first', 'value'], @dependency.send(:resolve_container_parameters, %w(first %parameter%)))
+  end
+
   def test_resolving_references_without_references
     assert_equal(%w(first second), @dependency.send(:resolve_references, %w(first second)))
   end

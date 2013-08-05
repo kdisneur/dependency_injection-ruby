@@ -12,6 +12,19 @@ class TestContainer < Minitest::Test
     DependencyInjection::Dependency.stubs(:new).with('MyOtherDependency', @container).returns(@another_dependency_object)
   end
 
+  def test_adding_new_parameter
+    @container.add_parameter('my.parameter', 'value')
+    assert_equal({ 'my.parameter' => 'value' }, @container.parameters)
+  end
+
+  def test_adding_an_already_existing_parameter
+    @container.add_parameter('my.parameter', 'value')
+    assert_equal({ 'my.parameter' => 'value' }, @container.parameters)
+
+    @container.add_parameter('my.parameter', 'other value')
+    assert_equal({ 'my.parameter' => 'other value' }, @container.parameters)
+  end
+
   def test_getting_a_registered_dependency_returns_an_object
     @container.register('my_dependency', 'MyDependency')
     assert_equal(@final_object, @container.get('my_dependency'))

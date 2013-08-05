@@ -33,13 +33,27 @@ module DependencyInjection
 
     def object
       return @object if @object
-      @object = self.klass.new(*resolve_references(self.arguments))
-      self.method_calls.each { |method_name, arguments| @object.send(method_name, *resolve_references(arguments)) }
+      @object = self.klass.new(*resolve(self.arguments))
+      self.method_calls.each { |method_name, arguments| @object.send(method_name, *resolve(arguments)) }
 
       @object
     end
 
   private
+
+    def resolve(arguments)
+      resolve_references(resolve_container_parameters(arguments))
+    end
+
+    def resolve_container_parameters(arguments)
+      arguments.map do |argument|
+        if /^%(?<parameter_name>.*)%$/ =~ argument
+          @container.parameters[parameter_name]
+        else
+          argument
+        end
+      end
+    end
 
     def resolve_references(arguments)
       arguments.map do |argument|
