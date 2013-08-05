@@ -44,6 +44,11 @@ class TestContainer < Minitest::Test
     assert_equal({ 'my_definition' => @definition }, @container.definitions)
   end
 
+  def test_registering_a_lazy_definition
+    DependencyInjection::LazyDefinition.stubs(:new).with('MyLazyDefinition', @container)
+    @container.register('my_lazy_definition', 'MyLazyDefinition', true)
+  end
+
   def test_registering_a_class_return_a_definition_object
     assert_equal(@definition, @container.register('my_definition', 'MyDefinition'))
   end

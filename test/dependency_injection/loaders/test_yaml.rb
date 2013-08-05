@@ -70,9 +70,24 @@ class TestYaml < Minitest::Test
     @yaml_loader.send(:add_service, 'my_alias', { 'alias' => 'my_definition' })
   end
 
+  def test_adding_standard_service_as_lazy
+    @container.expects(:register).with('my_lazy_definition', 'MyLazyDefinition', true)
+    @yaml_loader.send(:add_standard_service, 'my_lazy_definition', { 'class' => 'MyLazyDefinition', 'lazy' => true })
+  end
+
+  def test_adding_standard_service_as_not_lazy
+    @container.expects(:register).with('my_definition', 'MyDefinition', false)
+    @yaml_loader.send(:add_standard_service, 'my_definition', { 'class' => 'MyDefinition', 'lazy' => false })
+  end
+
+  def test_adding_standard_service_with_default_lazy_value
+    @container.expects(:register).with('my_definition', 'MyDefinition', false)
+    @yaml_loader.send(:add_standard_service, 'my_definition', { 'class' => 'MyDefinition' })
+  end
+
   def test_adding_standard_service_without_parameters
     definition = mock
-    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
     definition.expects(:add_arguments).never
 
     @yaml_loader.send(:add_standard_service, 'key_1', { 'class' => 'MyKlass' })
@@ -80,7 +95,7 @@ class TestYaml < Minitest::Test
 
   def test_adding_standard_service_with_parameters
     definition = mock
-    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
     definition.expects(:add_arguments).with('arg_1', 'arg_2')
 
     @yaml_loader.send(:add_standard_service, 'key_1', { 'class' => 'MyKlass', 'arguments' => ['arg_1', 'arg_2'] })
@@ -88,7 +103,7 @@ class TestYaml < Minitest::Test
 
   def test_adding_standard_service_without_method_calls
     definition = mock
-    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
     definition.expects(:add_method_call).never
 
     @yaml_loader.send(:add_standard_service, 'key_1', { 'class' => 'MyKlass' })
@@ -96,7 +111,7 @@ class TestYaml < Minitest::Test
 
   def test_adding_standard_service_with_method_calls
     definition = mock
-    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
     definition.expects(:add_method_call).with('method_1', 'arg_1')
     definition.expects(:add_method_call).with('method_2', 'arg_1', 'arg_2')
     definition.expects(:add_method_call).with('method_3', %w(arg_1 arg_2))
@@ -108,7 +123,7 @@ class TestYaml < Minitest::Test
 
   def test_adding_standard_service_without_configurator
     definition = mock
-    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
     definition.expects(:add_configurator).never
 
     @yaml_loader.send(:add_standard_service, 'key_1', { 'class' => 'MyKlass' })
@@ -116,7 +131,7 @@ class TestYaml < Minitest::Test
 
   def test_adding_standard_service_with_configurator
     definition = mock
-    @container.stubs(:register).with('key_1', 'MyKlass').returns(definition)
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
     definition.expects(:add_configurator).with('ConfiguratorKlass', 'method_name')
 
     @yaml_loader.send(:add_standard_service, 'key_1', { 'class' => 'MyKlass', 'configurator' => ['ConfiguratorKlass', 'method_name'] })
