@@ -3,13 +3,17 @@ require 'dependency_injection/container'
 
 class TestContainer < Minitest::Test
   def setup
-    @container    = DependencyInjection::Container.new
-    @final_object = mock
-    @definition   = mock
+    @container     = DependencyInjection::Container.new
+    @alias         = mock
+    @another_alias = mock
+    @final_object  = mock
+    @definition    = mock
     @definition.stubs(:object).returns(@final_object)
     @another_definition = mock
     DependencyInjection::Definition.stubs(:new).with('MyDefinition', @container).returns(@definition)
     DependencyInjection::Definition.stubs(:new).with('MyOtherDefinition', @container).returns(@another_definition)
+    DependencyInjection::AliasDefinition.stubs(:new).with('my_definition', @container).returns(@alias)
+    DependencyInjection::AliasDefinition.stubs(:new).with('my_other_definition', @container).returns(@another_alias)
   end
 
   def test_adding_new_parameter
@@ -50,5 +54,17 @@ class TestContainer < Minitest::Test
 
     @container.register('my_definition', 'MyOtherDefinition')
     assert_equal({ 'my_definition' => @another_definition }, @container.definitions)
+  end
+
+  def test_registering_an_alias_returns_an_alias_definition_object
+    assert_equal(@alias, @container.register_alias('my_alias', 'my_definition'))
+  end
+
+  def test_registering_an_already_existing_alias_definition_replace_it
+    @container.register_alias('my_alias', 'my_definition')
+    assert_equal({ 'my_alias' => @alias }, @container.definitions)
+
+    @container.register_alias('my_alias', 'my_other_definition')
+    assert_equal({ 'my_alias' => @another_alias }, @container.definitions)
   end
 end

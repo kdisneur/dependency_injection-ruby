@@ -1,0 +1,8 @@
+parameters:
+  mailer.transport: sendmail
+services:
+  my.mailer:
+    class: Mailer
+    method_call: ['transport=', '%mailer.transport%']
+  aliased.mailer:
+    alias: 'my.mailer'
