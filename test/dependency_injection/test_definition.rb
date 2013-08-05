@@ -35,6 +35,16 @@ class TestDefinition < Minitest::Test
     assert_equal(%w(first second third), @definition.arguments)
   end
 
+  def test_adding_configurator
+    @definition.add_configurator('ConfiguratorKlass', 'method_name')
+
+    assert_equal(%w(ConfiguratorKlass method_name), @definition.configurator)
+  end
+
+  def test_adding_configurator_returns_definition_object
+    assert_equal(@definition, @definition.add_configurator('ConfiguratorKlass', 'method_name'))
+  end
+
   def test_adding_a_method_call_without_parameters
     @definition.add_method_call('my_method')
 
@@ -89,6 +99,33 @@ class TestDefinition < Minitest::Test
 
     @definition.add_method_call('method_1')
     @definition.add_method_call('method_2', 'value')
+
+    @definition.object
+  end
+
+  def test_getting_object_without_configurator
+    configurator_object = mock
+    final_object        = mock
+    final_class         = mock
+    @definition.stubs(:klass).returns(final_class)
+    @definition.stubs(:resolve).with([]).returns([])
+    @definition.stubs(:resolve).with(['ConfiguratorKlass']).returns([configurator_object])
+    configurator_object.expects(:send).never
+    final_class.stubs(:new).with.returns(final_object)
+
+    @definition.object
+  end
+
+  def test_getting_object_with_configurator
+    configurator_object = mock
+    final_object        = mock
+    final_class         = mock
+    @definition.stubs(:klass).returns(final_class)
+    @definition.stubs(:resolve).with([]).returns([])
+    @definition.stubs(:resolve).with(['ConfiguratorKlass']).returns([configurator_object])
+    @definition.add_configurator('ConfiguratorKlass', 'method_name')
+    configurator_object.expects(:send).with('method_name', final_object)
+    final_class.stubs(:new).with.returns(final_object)
 
     @definition.object
   end

@@ -26,6 +26,9 @@ module DependencyInjection
       def add_service(name, parameters)
         definition = @container.register(name, parameters['class'])
         definition.add_arguments(*parameters['arguments']) if parameters['arguments']
+        if (configurator = parameters['configurator'])
+          definition.add_configurator(configurator[0], configurator[1])
+        end
         if parameters['calls']
           parameters['calls'].each { |method_name, arguments| definition.add_method_call(method_name, *arguments) }
         end

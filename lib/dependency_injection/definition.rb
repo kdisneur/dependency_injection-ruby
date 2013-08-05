@@ -2,7 +2,7 @@ require 'active_support/core_ext/string/inflections'
 
 module DependencyInjection
   class Definition
-    attr_accessor :klass_name, :arguments, :method_calls
+    attr_accessor :arguments, :configurator, :klass_name, :method_calls
 
     def initialize(klass_name, container)
       @container        = container
@@ -17,6 +17,12 @@ module DependencyInjection
 
     def add_arguments(*arguments)
       self.arguments += arguments
+
+      self
+    end
+
+    def add_configurator(name, method_name)
+      self.configurator = [name, method_name]
 
       self
     end
@@ -36,6 +42,11 @@ module DependencyInjection
 
       @object = self.klass.new(*resolve(self.arguments))
       self.method_calls.each { |method_name, arguments| @object.send(method_name, *resolve(arguments)) }
+      if self.configurator
+        name, method_name   = self.configurator
+        configurator_object = resolve([name]).first
+        configurator_object.send(method_name, @object)
+      end
 
       @object
     end
