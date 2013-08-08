@@ -143,7 +143,7 @@ Before diving into the details of __DependencyInjection__, here are some keyword
 
 __DependencyInjection__ needs to be configured, using a yaml file, in order to map your services with your existing classes and their dependencies. There's also some other options that we'll list below.
 
-Here's an configuration file example using almost everything __DependencyInjection__ has to offer:
+Here's a configuration file example using almost everything __DependencyInjection__ has to offer:
 
 ```yaml
 parameters:
