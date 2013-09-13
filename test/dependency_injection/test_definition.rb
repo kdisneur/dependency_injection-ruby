@@ -130,6 +130,32 @@ class TestDefinition < Minitest::Test
     @definition.object
   end
 
+  def test_getting_container_scoped_object
+    @definition.scope = :container
+    @definition.expects(:send).with('container_scoped_object')
+    @definition.object
+  end
+
+  def test_getting_container_scoped_object_multiple_times
+    @definition.stubs(:initialize_object).returns(:object_1, :object_2)
+    @definition.scope = :container
+    assert_equal(:object_1, @definition.object)
+    assert_equal(:object_1, @definition.object)
+  end
+
+  def test_getting_prototype_scoped_object
+    @definition.scope = :prototype
+    @definition.expects(:send).with('prototype_scoped_object')
+    @definition.object
+  end
+
+  def test_getting_prototype_scoped_object_multiple_times
+    @definition.stubs(:initialize_object).returns(:object_1, :object_2)
+    @definition.scope = :prototype
+    assert_equal(:object_1, @definition.object)
+    assert_equal(:object_2, @definition.object)
+  end
+
   def test_resolving_first_container_parameters
     changed_arguments = mock
     arguments         = mock
@@ -162,10 +188,39 @@ class TestDefinition < Minitest::Test
     assert_equal(%w(first second), @definition.send(:resolve_references, %w(first second)))
   end
 
-  def test_resolving_references_with_references
+  def test_resolving_references_with_defintion_and_referenced_object_in_container_scope
     referenced_object = mock
+    referenced_object.stubs(:scope).returns(:container)
+    @definition.scope= :container
     @container.stubs(:get).with('reference.name').returns(referenced_object)
 
     assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
+  end
+
+  def test_resolving_references_with_defintion_and_referenced_object_in_prototype_scope
+    referenced_object = mock
+    referenced_object.stubs(:scope).returns(:prototype)
+    @definition.scope= :prototype
+    @container.stubs(:get).with('reference.name').returns(referenced_object)
+
+    assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
+  end
+
+  def test_resolving_references_with_defintion_in_prototype_scope_and_referenced_object_in_container_scope
+    referenced_object = mock
+    referenced_object.stubs(:scope).returns(:container)
+    @definition.scope= :prototype
+    @container.stubs(:get).with('reference.name').returns(referenced_object)
+
+    assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
+  end
+
+  def test_resolving_references_with_defintion_in_container_scope_and_referenced_object_in_prototype_scope
+    referenced_object = mock
+    referenced_object.stubs(:scope).returns(:prototype)
+    @definition.scope= :container
+    @container.stubs(:get).with('reference.name').returns(referenced_object)
+
+    assert_raises(ScopeWideningInjectionError) { @definition.send(:resolve_references, %w(first @reference.name)) }
   end
 end
