@@ -38,6 +38,7 @@ module DependencyInjection
       def add_standard_service(name, parameters)
         lazy_load  = parameters['lazy'] || false
         definition = @container.register(name, parameters['class'], lazy_load)
+        definition.scope = parameters['scope'] if parameters['scope']
         definition.add_arguments(*parameters['arguments']) if parameters['arguments']
         if (configurator = parameters['configurator'])
           definition.add_configurator(configurator[0], configurator[1])

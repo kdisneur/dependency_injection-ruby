@@ -70,6 +70,22 @@ class TestYaml < Minitest::Test
     @yaml_loader.send(:add_service, 'my_alias', { 'alias' => 'my_definition' })
   end
 
+  def test_adding_service_without_defined_scope
+    definition = mock
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
+
+    definition.expects(:scope=).never
+    @yaml_loader.send(:add_service, 'key_1', { 'class' => 'MyKlass' })
+  end
+
+  def test_adding_service_with_defined_scope
+    definition = mock
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
+
+    definition.expects(:scope=).with('awesome_scope')
+    @yaml_loader.send(:add_service, 'key_1', { 'class' => 'MyKlass', 'scope' => 'awesome_scope' })
+  end
+
   def test_adding_standard_service_as_lazy
     @container.expects(:register).with('my_lazy_definition', 'MyLazyDefinition', true)
     @yaml_loader.send(:add_standard_service, 'my_lazy_definition', { 'class' => 'MyLazyDefinition', 'lazy' => true })

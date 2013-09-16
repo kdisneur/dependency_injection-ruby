@@ -1,14 +1,16 @@
 require 'active_support/core_ext/string/inflections'
+require 'dependency_injection/scope_widening_injection_error'
 
 module DependencyInjection
   class Definition
-    attr_accessor :arguments, :configurator, :klass_name, :method_calls
+    attr_accessor :arguments, :configurator, :klass_name, :method_calls, :scope
 
     def initialize(klass_name, container)
       @container        = container
       self.arguments    = []
       self.klass_name   = klass_name
       self.method_calls = {}
+      self.scope        = :container
     end
 
     def add_argument(argument)
@@ -38,20 +40,30 @@ module DependencyInjection
     end
 
     def object
-      return @object if @object
-
-      @object = self.klass.new(*resolve(self.arguments))
-      self.method_calls.each { |method_name, arguments| @object.send(method_name, *resolve(arguments)) }
-      if self.configurator
-        name, method_name   = self.configurator
-        configurator_object = resolve([name]).first
-        configurator_object.send(method_name, @object)
-      end
-
-      @object
+      self.send("#{self.scope}_scoped_object")
     end
 
   private
+
+    def container_scoped_object
+      @object ||= initialize_object
+    end
+
+    def initialize_object
+      object = self.klass.new(*resolve(self.arguments))
+      self.method_calls.each { |method_name, arguments| object.send(method_name, *resolve(arguments)) }
+      if self.configurator
+        name, method_name   = self.configurator
+        configurator_object = resolve([name]).first
+        configurator_object.send(method_name, object)
+      end
+
+      object
+    end
+
+    def prototype_scoped_object
+      initialize_object
+    end
 
     def resolve(arguments)
       resolve_references(resolve_container_parameters(arguments))
@@ -70,7 +82,10 @@ module DependencyInjection
     def resolve_references(arguments)
       arguments.map do |argument|
         if /^@(?<reference_name>.*)/ =~ argument
-          @container.get(reference_name)
+          reference = @container.get(reference_name)
+          raise ScopeWideningInjectionError if reference.scope == :prototype && scope == :container
+
+          reference
         else
           argument
         end
