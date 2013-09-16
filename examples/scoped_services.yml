@@ -1,0 +1,6 @@
+services:
+  my.container.scoped.service:
+    class: 'ContainerScopedService'
+  my.prototype.scoped.service:
+    class: 'PrototypeScopedService'
+    scope: 'prototype'

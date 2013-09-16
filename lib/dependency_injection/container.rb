@@ -23,7 +23,7 @@ module DependencyInjection
 
     def register(name, klass_name, lazy=false)
       definition = lazy ? LazyDefinition.new(klass_name, self) : Definition.new(klass_name, self)
-      @definitions[name] =definition
+      @definitions[name] = definition
     end
 
     def register_alias(name, alias_definition_name)

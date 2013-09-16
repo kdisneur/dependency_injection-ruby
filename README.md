@@ -89,7 +89,7 @@ Another big drawback is that you have to instantiate as many objects as you have
 Our two classes stay untouched, the only thing you have to do is to add a configuration file.
 
 ```yaml
-# services.yml 
+# services.yml
 parameters:
   mailer.transporter: 'smtp'
 services:
@@ -175,6 +175,12 @@ And here's some more details about each keyword:
 * `lazy`: Returns a Proxy Object if true. The _real_ object will only be instantiated at the first method call.
 
 * `alias`: A string containing the target service name.
+
+* `scope`: A string containing one of two possibles values to handle the service initialization scope:
+  * `container`: a service is initialized only once throughout the container life (default)
+  * `prototype`: a new service is initialized each time you call the container
+
+  Note that the usage of a `prototype` service inside a `container` service raises a `ScopeWideningInjectionError`
 
 __Please note:__
 * You can reference a variable in the configuration with the following syntax: `%variable%`.
