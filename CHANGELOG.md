@@ -1,3 +1,7 @@
+# 0.3.0 (2013-09-16)
+
+* Add prototype and container scope notion in service
+
 # 0.2.0
 
 * Add lazy loading option
