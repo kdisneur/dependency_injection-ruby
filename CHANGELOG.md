@@ -1,3 +1,7 @@
+# 0.3.1 (2013-09-17)
+
+* Nothing adding/removed. Just fix the Gemfile.lock
+
 # 0.3.0 (2013-09-16)
 
 * Add prototype and container scope notion in service
