@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dependency_injection (0.2.0)
+    dependency_injection (0.3.1)
       activesupport
 
 GEM
