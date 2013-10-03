@@ -15,8 +15,12 @@ module DependencyInjection
       @parameters[name] = value
     end
 
+    def find(name)
+      @definitions[name]
+    end
+
     def get(name)
-      if (definition = @definitions[name])
+      if (definition = self.find(name))
         definition.object
       end
     end

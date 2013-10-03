@@ -82,8 +82,9 @@ module DependencyInjection
     def resolve_references(arguments)
       arguments.map do |argument|
         if /^@(?<reference_name>.*)/ =~ argument
-          reference = @container.get(reference_name)
-          raise ScopeWideningInjectionError if reference.scope == :prototype && scope == :container
+          reference_definition = @container.find(reference_name)
+          reference            = reference_definition.object
+          raise ScopeWideningInjectionError if reference_definition.scope == :prototype && scope == :container
 
           reference
         else

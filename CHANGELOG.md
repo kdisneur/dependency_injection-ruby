@@ -1,3 +1,7 @@
+# 0.3.2
+
+* Fix an error when a service use another service
+
 # 0.3.1 (2013-09-17)
 
 * Nothing adding/removed. Just fix the Gemfile.lock
