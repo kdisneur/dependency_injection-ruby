@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Dependency injection for Ruby by kdisneur</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Dependency injection for Ruby</h1>
+        <h2></h2>
+        <a href="https://github.com/kdisneur/dependency_injection-ruby" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a name="dependency-injection-for-ruby" class="anchor" href="#dependency-injection-for-ruby"><span class="octicon octicon-link"></span></a>Dependency Injection for Ruby</h1>
+
+<p><a href="https://travis-ci.org/kdisneur/dependency_injection-ruby"><img src="https://travis-ci.org/kdisneur/dependency_injection-ruby.png?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/r/kdisneur/dependency_injection-ruby?branch=master"><img src="https://coveralls.io/repos/kdisneur/dependency_injection-ruby/badge.png?branch=master" alt="Coverage Status"></a> <a href="https://codeclimate.com/github/kdisneur/dependency_injection-ruby"><img src="https://codeclimate.com/github/kdisneur/dependency_injection-ruby.png" alt="Code Climate"></a></p>
+
+<h2>
+<a name="foreword" class="anchor" href="#foreword"><span class="octicon octicon-link"></span></a>Foreword</h2>
+
+<p>This gem is heavily inspired from The Symfony Framework <a href="http://symfony.com/doc/current/book/service_container.html">Container Service</a>. Here's the description they give to explain the concept:</p>
+
+<blockquote>
+<p>It helps you instantiate, organize and retrieve the many objects of your application. This object, called a service container, will allow you to standardize and centralize the way objects are constructed in your application. The container makes your life easier, is super fast, and emphasizes an architecture that promotes reusable and decoupled code.</p>
+</blockquote>
+
+<p>You can learn more about everything this gem does by looking at the <a href="https://github.com/kdisneur/dependency_injection-ruby/tree/master/examples">examples</a> directory. See <a href="#usage">Usage</a> for a detailed explanation.</p>
+
+<h2>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>Description</h2>
+
+<h3>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>Just add the gem to your Gemfile:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="n">gem</span> <span class="s1">'dependency_injection'</span>
+</pre></div>
+
+<p>Or simply install it using rubygems:</p>
+
+<pre lang="shell"><code>gem install dependency_injection
+</code></pre>
+
+<h3>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h3>
+
+<h4>
+<a name="without-using-dependency-injection" class="anchor" href="#without-using-dependency-injection"><span class="octicon octicon-link"></span></a>Without using Dependency Injection</h4>
+
+<p>In this example, we'll consider a simple application that needs to send emails for a newsletter.</p>
+
+<p>We have the two following classes:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># mailer.rb</span>
+<span class="k">class</span> <span class="nc">Mailer</span>
+  <span class="kp">attr_accessor</span> <span class="ss">:transporter</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span>
+    <span class="nb">puts</span> <span class="s1">'mailer initialized'</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">send_mail</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">recipient</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s2">"mail sent via </span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">transporter</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># newsletter_manager.rb</span>
+<span class="k">class</span> <span class="nc">NewsletterManager</span>
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">mailer</span><span class="p">)</span>
+    <span class="vi">@mailer</span> <span class="o">=</span> <span class="n">mailer</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">send_newsletter</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">recipients</span><span class="p">)</span>
+    <span class="nb">puts</span> <span class="s1">'newsletter #{message} send to #{recipients}'</span>
+    <span class="n">recipients</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">recipient</span><span class="o">|</span> <span class="vi">@mailer</span><span class="o">.</span><span class="n">send_mail</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">recipient</span><span class="p">)</span> <span class="p">}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>A <code>Mailer</code> class that handles email sending, through a given transporter, for a recipient.</p>
+
+<p>A <code>NewsletterManager</code> class that sends a newsletter (message) to a list of recipients.</p>
+
+<p>Without <strong>DependencyInjection</strong>, we would need to do the following to achieve our goal:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># send_newsletter.rb</span>
+<span class="n">mailer</span> <span class="o">=</span> <span class="no">Mailer</span><span class="o">.</span><span class="n">new</span>
+<span class="n">mailer</span><span class="o">.</span><span class="n">transporter</span> <span class="o">=</span> <span class="ss">:smtp</span>
+
+<span class="n">recipients</span> <span class="o">=</span> <span class="sx">%w(john@doe.com david@heinemeier-hansson.com)</span>
+<span class="n">message</span>    <span class="o">=</span> <span class="s1">'I love dependency injection and think this is the future!'</span>
+
+<span class="n">newsletter_manager</span> <span class="o">=</span> <span class="no">NewsletterManager</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">mailer</span><span class="p">)</span>
+<span class="n">newsletter_manager</span><span class="o">.</span><span class="n">send_newsletter</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">recipients</span><span class="p">)</span>
+</pre></div>
+
+<p>You have a working application but this code is thightly coupled and might be, in a real life, hard to refactor.</p>
+
+<p>Another big drawback is that you have to instantiate as many objects as you have emails and newsletters to send.</p>
+
+<h4>
+<a name="now-with-dependency-injection" class="anchor" href="#now-with-dependency-injection"><span class="octicon octicon-link"></span></a>Now with Dependency Injection</h4>
+
+<p>Our two classes stay untouched, the only thing you have to do is to add a configuration file.</p>
+
+<div class="highlight highlight-yaml"><pre><span class="c1"># services.yml</span>
+<span class="l-Scalar-Plain">parameters</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">mailer.transporter</span><span class="p-Indicator">:</span> <span class="s">'smtp'</span>
+<span class="l-Scalar-Plain">services</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">mailer</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="s">'Mailer'</span>
+    <span class="l-Scalar-Plain">calls</span><span class="p-Indicator">:</span>
+      <span class="p-Indicator">-</span> <span class="p-Indicator">[</span><span class="s">'transporter='</span><span class="p-Indicator">,</span> <span class="s">'%mailer.transporter%'</span><span class="p-Indicator">]</span>
+  <span class="l-Scalar-Plain">newsletter_manager</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="s">'NewsletterManager'</span>
+    <span class="l-Scalar-Plain">arguments</span><span class="p-Indicator">:</span>
+      <span class="p-Indicator">-</span> <span class="s">'@mailer'</span>
+</pre></div>
+
+<p>We now need to require <strong>DependencyInjection</strong> and declare our <strong>Container</strong>.</p>
+
+<p>Please note that the following code only needs to be declared once as long as the <code>container</code> value is accessible throughout your whole application.</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># initialize.rb</span>
+<span class="nb">require</span> <span class="s1">'dependency_injection/container'</span>
+<span class="nb">require</span> <span class="s1">'dependency_injection/loaders/yaml'</span>
+
+<span class="n">container</span> <span class="o">=</span> <span class="ss">DependencyInjection</span><span class="p">:</span><span class="ss">:Container</span><span class="o">.</span><span class="n">new</span>
+<span class="n">loader</span>    <span class="o">=</span> <span class="ss">DependencyInjection</span><span class="p">:</span><span class="ss">:Loaders</span><span class="o">::</span><span class="no">Yaml</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">container</span><span class="p">)</span>
+<span class="n">loader</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)),</span> <span class="s1">'services.yml'</span><span class="p">))</span>
+</pre></div>
+
+<p>We can now do the same as the previous example with the following.</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># send_newsletter.rb</span>
+<span class="n">recipients</span> <span class="o">=</span> <span class="sx">%w(john@doe.com david@heinemeier-hansson.com)</span>
+<span class="n">message</span>    <span class="o">=</span> <span class="s1">'I love dependency injection and think this is the future!'</span>
+
+<span class="n">container</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'newsletter_manager'</span><span class="p">)</span><span class="o">.</span><span class="n">send_newsletter</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">recipients</span><span class="p">)</span>
+</pre></div>
+
+<p>Now your code is no longer tightly coupled and can be a lot more easily refactored. Moreover, the <code>Mailer</code> and <code>NewsletterManager</code> classes are only instantiated once during your application's lifecycle.</p>
+
+<h3>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h3>
+
+<p>Before diving into the details of <strong>DependencyInjection</strong>, here are some keywords that you need to be acquainted with:</p>
+
+<ul>
+<li><p><strong>Container</strong> object must be declared to be used by your application during it's whole lifecycle. The Container job is to register and retrieve Services.</p></li>
+<li><p><strong>Service</strong> is a Plain Old Ruby Object (Poro o/) that contains your own logic. The <strong>DependencyInjection</strong> gem doesn't need to know anything about it and won't force your to add/inherit any specific method.</p></li>
+<li><p><strong>Configurator</strong> is a standard Ruby Class that shares a callable to be used by different objects (like Services) to configure them after their instantiation.</p></li>
+</ul><h4>
+<a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>Configuration</h4>
+
+<p><strong>DependencyInjection</strong> needs to be configured, using a yaml file, in order to map your services with your existing classes and their dependencies. There's also some other options that we'll list below.</p>
+
+<p>Here's a configuration file example using almost everything <strong>DependencyInjection</strong> has to offer:</p>
+
+<div class="highlight highlight-yaml"><pre><span class="l-Scalar-Plain">parameters</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">mailer.transport</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">smtp</span>
+<span class="l-Scalar-Plain">services</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">mailer</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Mailer</span>
+    <span class="l-Scalar-Plain">calls</span><span class="p-Indicator">:</span>
+      <span class="p-Indicator">-</span> <span class="p-Indicator">[</span><span class="s">'transport='</span><span class="p-Indicator">,</span> <span class="s">'%mailer.transport%'</span><span class="p-Indicator">]</span>
+    <span class="l-Scalar-Plain">lazy</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span>
+  <span class="l-Scalar-Plain">newsletter</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">class</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">NewsletterManager</span>
+    <span class="l-Scalar-Plain">arguments</span><span class="p-Indicator">:</span>
+      <span class="p-Indicator">-</span> <span class="s">'@mailer'</span>
+</pre></div>
+
+<p>And here's some more details about each keyword:</p>
+
+<ul>
+<li><p><code>parameters</code>: Based on a basic key/value scheme. This can later be used throughout your services by calling <code>%parameter_name%</code>.</p></li>
+<li><p><code>services</code>: The services name must be used as the first indentation tier.</p></li>
+<li><p><code>class</code>: A string containing the class name of your service.</p></li>
+<li><p><code>arguments</code>: An array containing the parameters used by your class <code>intialize</code> method.</p></li>
+<li><p><code>calls</code>: An array containing an array of each instance method and its parameters. Note that you only need to define the methods during your class instantiation.</p></li>
+<li><p><code>lazy</code>: Returns a Proxy Object if true. The <em>real</em> object will only be instantiated at the first method call.</p></li>
+<li><p><code>alias</code>: A string containing the target service name.</p></li>
+<li>
+<p><code>scope</code>: A string containing one of two possibles values to handle the service initialization scope:</p>
+
+<ul>
+<li>
+<code>container</code>: a service is initialized only once throughout the container life (default)</li>
+<li>
+<code>prototype</code>: a new service is initialized each time you call the container</li>
+</ul>
+<p>Note that the usage of a <code>prototype</code> service inside a <code>container</code> service raises a <code>ScopeWideningInjectionError</code></p>
+</li>
+</ul><p><strong>Please note:</strong></p>
+
+<ul>
+<li>You can reference a variable in the configuration with the following syntax: <code>%variable%</code>.</li>
+<li>You can reference declared services by prefixing it with an <code>@</code> sign.</li>
+<li>If you declare a service as an alias, the target service configuration will be used. Your own service configuration will be ignored.</li>
+</ul><h3>
+<a name="tests" class="anchor" href="#tests"><span class="octicon octicon-link"></span></a>Tests</h3>
+
+<p><strong>DependencyInjection</strong> is covered by tests at 100%, see <a href="https://coveralls.io/r/kdisneur/dependency_injection-ruby">coveralls.io</a> service.</p>
+
+<p>If you want to launch the tests by yourself:</p>
+
+<ul>
+<li>Clone this repository by running <code>git clone git@github.com:kdisneur/dependency_injection-ruby</code>
+</li>
+<li>Run <code>bundle install</code>
+</li>
+<li>Run <code>rake test</code>
+</li>
+</ul><h2>
+<a name="contribute" class="anchor" href="#contribute"><span class="octicon octicon-link"></span></a>Contribute</h2>
+
+<p>This is Github folks!</p>
+
+<p>If you find a <em>bug</em>, open an <a href="https://github.com/kdisneur/dependency_injection-ruby/issues">Issue</a>.</p>
+
+<p>It's OK to open an issue to ask us what we think about a change you'd like to make, so you don't work for nothing :)</p>
+
+<p>If you want to add/change/hack/fix/improve/whatever something, make a <a href="https://github.com/kdisneur/dependency_injection-ruby/pulls">Pull Request</a>:</p>
+
+<ul>
+<li>Fork this repository</li>
+<li>Create a feature branch on your fork, we just love <a href="http://nvie.com/posts/a-successful-git-branching-model/">git-flow</a>
+</li>
+<li>Do your stuff and pay attention to the following:
+
+<ul>
+<li>Your code should be documented using <a href="http://tomdoc.org">Tomdoc</a>
+</li>
+<li>You should follow <a href="https://github.com/styleguide/ruby">Github's Ruby Styleguide</a>
+</li>
+<li>If needed, squash your commits to group them logically</li>
+<li>Update the CHANGELOG accordingly</li>
+</ul>
+</li>
+<li>Make a Pull Request, we will <em>always</em> respond, and try to do it fast.</li>
+</ul>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/kdisneur/dependency_injection-ruby/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/kdisneur/dependency_injection-ruby/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/kdisneur/dependency_injection-ruby"></a> is maintained by <a href="https://github.com/kdisneur">kdisneur</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
