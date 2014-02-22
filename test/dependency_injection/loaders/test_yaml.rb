@@ -8,28 +8,28 @@ class TestYaml < Minitest::Test
   end
 
   def test_loading_file_without_parameters
-    YAML.stubs(:load_file).with('services.yml').returns({ 'services' => [] })
+    @yaml_loader.stubs(:load_file).with('services.yml').returns({ 'services' => [] })
     @yaml_loader.expects(:add_parameters).never
 
     @yaml_loader.load('services.yml')
   end
 
   def test_loading_file_with_parameters
-    YAML.stubs(:load_file).with('services.yml').returns({'parameters' => { 'key_1' => 'value_1' }, 'services' => [] })
+    @yaml_loader.stubs(:load_file).with('services.yml').returns({'parameters' => { 'key_1' => 'value_1' }, 'services' => [] })
     @yaml_loader.expects(:add_parameters).with({ 'key_1' => 'value_1' })
 
     @yaml_loader.load('services.yml')
   end
 
   def test_loading_file_without_services
-    YAML.stubs(:load_file).with('services.yml').returns({ 'parameters' => [] })
+    @yaml_loader.stubs(:load_file).with('services.yml').returns({ 'parameters' => [] })
     @yaml_loader.expects(:add_services).never
 
     @yaml_loader.load('services.yml')
   end
 
   def test_loading_file_with_services
-    YAML.stubs(:load_file).with('services.yml').returns({ 'parameters' => {}, 'services' => { 'service_1' => { 'class' => 'MyKlass' }}})
+    @yaml_loader.stubs(:load_file).with('services.yml').returns({ 'parameters' => {}, 'services' => { 'service_1' => { 'class' => 'MyKlass' }}})
     @yaml_loader.expects(:add_services).with({ 'service_1' => { 'class' => 'MyKlass' }})
 
     @yaml_loader.load('services.yml')
