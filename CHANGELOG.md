@@ -1,3 +1,7 @@
+# 0.4.1 (2014-02-23)
+
+* Nothing adding/removed. Just fix the Gemfile.lock
+
 # 0.4.0 (2014-02-23)
 
 * Fix an error when a service use another service
