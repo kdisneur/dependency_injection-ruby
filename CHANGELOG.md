@@ -1,4 +1,4 @@
-# 0.4.0
+# 0.4.0 (2014-02-23)
 
 * Fix an error when a service use another service
 * Add ERB support in YAML loader
