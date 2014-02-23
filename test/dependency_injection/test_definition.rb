@@ -71,6 +71,7 @@ class TestDefinition < Minitest::Test
   end
 
   def test_getting_object_with_arguments
+    @definition.stubs(:require_object).returns(mock)
     final_object = mock
     final_class  = mock
     @definition.stubs(:klass).returns(final_class)
@@ -81,6 +82,7 @@ class TestDefinition < Minitest::Test
   end
 
   def test_getting_object_without_arguments
+    @definition.stubs(:require_object).returns(mock)
     final_object = mock
     final_class  = mock
     @definition.stubs(:klass).returns(final_class)
@@ -90,6 +92,7 @@ class TestDefinition < Minitest::Test
   end
 
   def test_getting_object_with_method_calls
+    @definition.stubs(:require_object).returns(mock)
     final_object = mock
     final_class  = mock
     @definition.stubs(:klass).returns(final_class)
@@ -104,6 +107,7 @@ class TestDefinition < Minitest::Test
   end
 
   def test_getting_object_without_configurator
+    @definition.stubs(:require_object).returns(mock)
     configurator_object = mock
     final_object        = mock
     final_class         = mock
@@ -117,6 +121,7 @@ class TestDefinition < Minitest::Test
   end
 
   def test_getting_object_with_configurator
+    @definition.stubs(:require_object).returns(mock)
     configurator_object = mock
     final_object        = mock
     final_class         = mock
@@ -189,38 +194,58 @@ class TestDefinition < Minitest::Test
   end
 
   def test_resolving_references_with_defintion_and_referenced_object_in_container_scope
-    referenced_object = mock
-    referenced_object.stubs(:scope).returns(:container)
+    referenced_definition = mock
+    referenced_object     = mock
+    referenced_definition.stubs(:object).returns(referenced_object)
+    referenced_definition.stubs(:scope).returns(:container)
     @definition.scope= :container
-    @container.stubs(:get).with('reference.name').returns(referenced_object)
+    @container.stubs(:find).with('reference.name').returns(referenced_definition)
 
     assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
   end
 
   def test_resolving_references_with_defintion_and_referenced_object_in_prototype_scope
-    referenced_object = mock
-    referenced_object.stubs(:scope).returns(:prototype)
+    referenced_definition = mock
+    referenced_object     = mock
+    referenced_definition.stubs(:object).returns(referenced_object)
+    referenced_definition.stubs(:scope).returns(:prototype)
     @definition.scope= :prototype
-    @container.stubs(:get).with('reference.name').returns(referenced_object)
+    @container.stubs(:find).with('reference.name').returns(referenced_definition)
 
     assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
   end
 
   def test_resolving_references_with_defintion_in_prototype_scope_and_referenced_object_in_container_scope
-    referenced_object = mock
-    referenced_object.stubs(:scope).returns(:container)
+    referenced_definition = mock
+    referenced_object     = mock
+    referenced_definition.stubs(:object).returns(referenced_object)
+    referenced_definition.stubs(:scope).returns(:container)
     @definition.scope= :prototype
-    @container.stubs(:get).with('reference.name').returns(referenced_object)
+    @container.stubs(:find).with('reference.name').returns(referenced_definition)
 
     assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
   end
 
   def test_resolving_references_with_defintion_in_container_scope_and_referenced_object_in_prototype_scope
-    referenced_object = mock
-    referenced_object.stubs(:scope).returns(:prototype)
+    referenced_definition = mock
+    referenced_object     = mock
+    referenced_definition.stubs(:object).returns(referenced_object)
+    referenced_definition.stubs(:scope).returns(:prototype)
     @definition.scope= :container
-    @container.stubs(:get).with('reference.name').returns(referenced_object)
+    @container.stubs(:find).with('reference.name').returns(referenced_definition)
 
     assert_raises(ScopeWideningInjectionError) { @definition.send(:resolve_references, %w(first @reference.name)) }
+  end
+
+  def test_require_object_with_file_path
+    @definition.expects(:require).with('/file/to/path').once
+    @definition.file_path = '/file/to/path'
+    @definition.send(:require_object)
+  end
+
+  def test_require_object_automatically
+    @definition.expects(:require).with('my_module/my_class').once
+    @definition.klass_name = 'MyModule::MyClass'
+    @definition.send(:require_object)
   end
 end

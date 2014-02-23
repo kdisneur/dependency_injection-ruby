@@ -29,6 +29,15 @@ class TestContainer < Minitest::Test
     assert_equal({ 'my.parameter' => 'other value' }, @container.parameters)
   end
 
+  def test_find_a_registered_definition_returns_a_definition
+    @container.register('my_definition', 'MyDefinition')
+    assert_equal(@definition, @container.find('my_definition'))
+  end
+
+  def test_find_a_not_registered_definition_returns_nil
+    assert_equal(nil, @container.find('my_definition'))
+  end
+
   def test_getting_a_registered_definition_returns_an_object
     @container.register('my_definition', 'MyDefinition')
     assert_equal(@final_object, @container.get('my_definition'))

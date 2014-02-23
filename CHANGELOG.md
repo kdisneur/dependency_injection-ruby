@@ -1,3 +1,9 @@
+# 0.4.0 (2014-02-23)
+
+* Fix an error when a service use another service
+* Add ERB support in YAML loader
+* Add file_path option
+
 # 0.3.1 (2013-09-17)
 
 * Nothing adding/removed. Just fix the Gemfile.lock

@@ -1,3 +1,4 @@
+require 'erb'
 require 'yaml'
 
 module DependencyInjection
@@ -8,7 +9,7 @@ module DependencyInjection
       end
 
       def load(filename)
-        file = YAML::load_file(filename)
+        file = load_file(filename)
         add_parameters(file['parameters']) if file['parameters']
         add_services(file['services']) if file['services']
       end
@@ -38,7 +39,8 @@ module DependencyInjection
       def add_standard_service(name, parameters)
         lazy_load  = parameters['lazy'] || false
         definition = @container.register(name, parameters['class'], lazy_load)
-        definition.scope = parameters['scope'] if parameters['scope']
+        definition.scope     = parameters['scope'] if parameters['scope']
+        definition.file_path = parameters['file_path'] if parameters['file_path']
         definition.add_arguments(*parameters['arguments']) if parameters['arguments']
         if (configurator = parameters['configurator'])
           definition.add_configurator(configurator[0], configurator[1])
@@ -46,6 +48,10 @@ module DependencyInjection
         if parameters['calls']
           parameters['calls'].each { |method_name, arguments| definition.add_method_call(method_name, *arguments) }
         end
+      end
+
+      def load_file(filename)
+        YAML::load(ERB.new(IO.read(filename)).result)
       end
     end
   end
