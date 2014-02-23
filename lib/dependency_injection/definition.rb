@@ -3,11 +3,12 @@ require 'dependency_injection/scope_widening_injection_error'
 
 module DependencyInjection
   class Definition
-    attr_accessor :arguments, :configurator, :klass_name, :method_calls, :scope
+    attr_accessor :arguments, :configurator, :file_path, :klass_name, :method_calls, :scope
 
     def initialize(klass_name, container)
       @container        = container
       self.arguments    = []
+      self.file_path    = nil
       self.klass_name   = klass_name
       self.method_calls = {}
       self.scope        = :container
@@ -50,6 +51,7 @@ module DependencyInjection
     end
 
     def initialize_object
+      require_object
       object = self.klass.new(*resolve(self.arguments))
       self.method_calls.each { |method_name, arguments| object.send(method_name, *resolve(arguments)) }
       if self.configurator
@@ -61,8 +63,24 @@ module DependencyInjection
       object
     end
 
+    def object_already_required?
+      true if Kernel.const_get(self.klass_name)
+    rescue
+      false
+    end
+
     def prototype_scoped_object
       initialize_object
+    end
+
+    def require_object
+      return if object_already_required?
+
+      if self.file_path
+        require self.file_path
+      else
+        require self.klass_name.underscore
+      end
     end
 
     def resolve(arguments)

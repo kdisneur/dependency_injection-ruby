@@ -152,4 +152,12 @@ class TestYaml < Minitest::Test
 
     @yaml_loader.send(:add_standard_service, 'key_1', { 'class' => 'MyKlass', 'configurator' => ['ConfiguratorKlass', 'method_name'] })
   end
+
+  def test_adding_standard_service_with_file_path
+    definition = mock
+    @container.stubs(:register).with('key_1', 'MyKlass', false).returns(definition)
+    definition.expects(:file_path=).with('path/to/file')
+
+    @yaml_loader.send(:add_standard_service, 'key_1', { 'class' => 'MyKlass', 'file_path' => 'path/to/file' })
+  end
 end
