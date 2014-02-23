@@ -172,6 +172,8 @@ And here's some more details about each keyword:
 
 * `calls`: An array containing an array of each instance method and its parameters. Note that you only need to define the methods during your class instantiation.
 
+* `file_path`: A string containing the file path to require to load the class.
+
 * `lazy`: Returns a Proxy Object if true. The _real_ object will only be instantiated at the first method call.
 
 * `alias`: A string containing the target service name.
