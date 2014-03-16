@@ -189,6 +189,10 @@ class TestDefinition < Minitest::Test
     assert_equal(['first', 'value'], @definition.send(:resolve_container_parameters, %w(first %parameter%)))
   end
 
+  def test_resolving_references_with_array
+    assert_equal(['first', ['second', 'third']], @definition.send(:resolve_references, ['first', ['second', 'third']]))
+  end
+
   def test_resolving_references_without_references
     assert_equal(%w(first second), @definition.send(:resolve_references, %w(first second)))
   end
