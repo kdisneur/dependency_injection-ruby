@@ -87,27 +87,27 @@ module DependencyInjection
       resolve_references(resolve_container_parameters(arguments))
     end
 
-    def resolve_container_parameters(arguments)
-      arguments.map do |argument|
-        if /^%(?<parameter_name>.*)%$/ =~ argument
-          @container.parameters[parameter_name]
-        else
-          argument
-        end
+    def resolve_container_parameters(argument)
+      if argument.kind_of?(Array)
+        argument.map { |arg| resolve(arg) }
+      elsif /^%(?<parameter_name>.*)%$/ =~ argument
+        @container.parameters[parameter_name]
+      else
+        argument
       end
     end
 
-    def resolve_references(arguments)
-      arguments.map do |argument|
-        if /^@(?<reference_name>.*)/ =~ argument
-          reference_definition = @container.find(reference_name)
-          reference            = reference_definition.object
-          raise ScopeWideningInjectionError if reference_definition.scope == :prototype && scope == :container
+    def resolve_references(argument)
+      if argument.kind_of?(Array)
+        argument.map { |arg| resolve(arg) }
+      elsif /^@(?<reference_name>.*)/ =~ argument
+        reference_definition = @container.find(reference_name)
+        reference            = reference_definition.object
+        raise ScopeWideningInjectionError if reference_definition.scope == :prototype && scope == :container
 
-          reference
-        else
-          argument
-        end
+        reference
+      else
+        argument
       end
     end
   end
