@@ -1,3 +1,7 @@
+# 0.4.2 (2014-03-16)
+
+* Fix an error when a service takes an arrays as parameter
+
 # 0.4.1 (2014-02-23)
 
 * Nothing adding/removed. Just fix the Gemfile.lock
