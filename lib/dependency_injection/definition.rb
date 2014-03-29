@@ -90,7 +90,7 @@ module DependencyInjection
     def resolve_container_parameters(argument)
       if argument.kind_of?(Array)
         argument.map { |arg| resolve(arg) }
-      elsif /^%(?<parameter_name>.*)%$/ =~ argument
+      elsif /^%(?<parameter_name>.*)%$/ =~ argument.to_s
         @container.parameters[parameter_name]
       else
         argument
@@ -100,7 +100,7 @@ module DependencyInjection
     def resolve_references(argument)
       if argument.kind_of?(Array)
         argument.map { |arg| resolve(arg) }
-      elsif /^@(?<reference_name>.*)/ =~ argument
+      elsif /^@(?<reference_name>.*)/ =~ argument.to_s
         reference_definition = @container.find(reference_name)
         reference            = reference_definition.object
         raise ScopeWideningInjectionError if reference_definition.scope == :prototype && scope == :container

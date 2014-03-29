@@ -1,3 +1,7 @@
+# 0.4.3 (2014-03-29)
+
+* Fix Regex verification to be sure that the argument is a String
+
 # 0.4.2 (2014-03-16)
 
 * Fix an error when a service takes an arrays as parameter
