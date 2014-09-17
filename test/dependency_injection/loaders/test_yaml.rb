@@ -2,9 +2,25 @@ require 'test_helper'
 require 'dependency_injection/loaders/yaml'
 
 class TestYaml < Minitest::Test
+  def example_yaml
+    <<-eos
+parameters:
+  test: <%= 'bar' %>
+services:
+  foo: 'baz'
+    eos
+  end
+
   def setup
     @container   = mock
     @yaml_loader = DependencyInjection::Loaders::Yaml.new(@container)
+  end
+
+  def test_loading_file_parsed_as_erb_yaml
+    IO.expects(:read).with('services.yml').returns(example_yaml)
+    result = @yaml_loader.send(:load_file, 'services.yml')
+
+    assert_equal result, { 'parameters' => { 'test' => 'bar' }, 'services' => {'foo' => 'baz'} }
   end
 
   def test_loading_file_without_parameters
