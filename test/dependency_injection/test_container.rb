@@ -2,16 +2,26 @@ require 'test_helper'
 require 'dependency_injection/container'
 
 class TestContainer < Minitest::Test
+  def mock_definition(public=true)
+    definition = mock
+
+    definition.stubs(:public?).returns(public)
+
+    definition
+  end
+
   def setup
     @container     = DependencyInjection::Container.new
-    @alias         = mock
-    @another_alias = mock
+    @alias         = mock_definition
+    @another_alias = mock_definition
     @final_object  = mock
-    @definition    = mock
+    @definition    = mock_definition
     @definition.stubs(:object).returns(@final_object)
-    @another_definition = mock
+    @private_definition = mock_definition(false)
+    @another_definition = mock_definition
     DependencyInjection::Definition.stubs(:new).with('MyDefinition', @container).returns(@definition)
     DependencyInjection::Definition.stubs(:new).with('MyOtherDefinition', @container).returns(@another_definition)
+    DependencyInjection::Definition.stubs(:new).with('MyPrivateDefinition', @container).returns(@private_definition)
     DependencyInjection::AliasDefinition.stubs(:new).with('my_definition', @container).returns(@alias)
     DependencyInjection::AliasDefinition.stubs(:new).with('my_other_definition', @container).returns(@another_alias)
   end
@@ -45,6 +55,18 @@ class TestContainer < Minitest::Test
 
   def test_getting_a_not_registered_definition_returns_nil
     assert_equal(nil, @container.get('my_definition'))
+  end
+
+  def test_finding_a_private_definition_with_public_scope_returns_nil
+    @container.register('my_definition', 'MyPrivateDefinition')
+
+    assert_equal(nil, @container.find('my_definition'))
+  end
+
+  def test_finding_a_private_definition_with_private_scope_returns_definition
+    @container.register('my_definition', 'MyPrivateDefinition')
+
+    assert_equal(@private_definition, @container.find('my_definition', true))
   end
 
   def test_registering_a_definition

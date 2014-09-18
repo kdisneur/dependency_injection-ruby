@@ -7,6 +7,22 @@ class TestDefinition < Minitest::Test
     @definition = DependencyInjection::Definition.new('MyClass', @container)
   end
 
+  def test_private_definition
+    @definition.public = false
+
+    assert ! @definition.public?
+  end
+
+  def test_public_definition
+    @definition.public = true
+
+    assert @definition.public?
+  end
+
+  def test_public_definition_by_default
+    assert @definition.public?
+  end
+
   def test_adding_an_argument
     @definition.add_argument('new argument')
 
@@ -197,13 +213,24 @@ class TestDefinition < Minitest::Test
     assert_equal(%w(first second), @definition.send(:resolve_references, %w(first second)))
   end
 
+  def test_resolving_references_uses_private_container_lookup
+    referenced_definition = mock
+    referenced_object     = mock
+    referenced_definition.stubs(:object).returns(referenced_object)
+    referenced_definition.stubs(:scope).returns(:container)
+
+    @container.expects(:find).with('reference.name', true).returns(referenced_definition)
+
+    @definition.send(:resolve_references, '@reference.name')
+  end
+
   def test_resolving_references_with_defintion_and_referenced_object_in_container_scope
     referenced_definition = mock
     referenced_object     = mock
     referenced_definition.stubs(:object).returns(referenced_object)
     referenced_definition.stubs(:scope).returns(:container)
     @definition.scope= :container
-    @container.stubs(:find).with('reference.name').returns(referenced_definition)
+    @container.stubs(:find).with('reference.name', true).returns(referenced_definition)
 
     assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
   end
@@ -214,7 +241,7 @@ class TestDefinition < Minitest::Test
     referenced_definition.stubs(:object).returns(referenced_object)
     referenced_definition.stubs(:scope).returns(:prototype)
     @definition.scope= :prototype
-    @container.stubs(:find).with('reference.name').returns(referenced_definition)
+    @container.stubs(:find).with('reference.name', true).returns(referenced_definition)
 
     assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
   end
@@ -225,7 +252,7 @@ class TestDefinition < Minitest::Test
     referenced_definition.stubs(:object).returns(referenced_object)
     referenced_definition.stubs(:scope).returns(:container)
     @definition.scope= :prototype
-    @container.stubs(:find).with('reference.name').returns(referenced_definition)
+    @container.stubs(:find).with('reference.name', true).returns(referenced_definition)
 
     assert_equal(['first', referenced_object], @definition.send(:resolve_references, %w(first @reference.name)))
   end
@@ -236,7 +263,7 @@ class TestDefinition < Minitest::Test
     referenced_definition.stubs(:object).returns(referenced_object)
     referenced_definition.stubs(:scope).returns(:prototype)
     @definition.scope= :container
-    @container.stubs(:find).with('reference.name').returns(referenced_definition)
+    @container.stubs(:find).with('reference.name', true).returns(referenced_definition)
 
     assert_raises(ScopeWideningInjectionError) { @definition.send(:resolve_references, %w(first @reference.name)) }
   end

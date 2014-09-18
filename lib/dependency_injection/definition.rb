@@ -4,6 +4,7 @@ require 'dependency_injection/scope_widening_injection_error'
 module DependencyInjection
   class Definition
     attr_accessor :arguments, :configurator, :file_path, :klass_name, :method_calls, :scope
+    attr_writer :public
 
     def initialize(klass_name, container)
       @container        = container
@@ -12,6 +13,11 @@ module DependencyInjection
       self.klass_name   = klass_name
       self.method_calls = {}
       self.scope        = :container
+      self.public       = true
+    end
+
+    def public?
+      @public
     end
 
     def add_argument(argument)
@@ -101,7 +107,7 @@ module DependencyInjection
       if argument.kind_of?(Array)
         argument.map { |arg| resolve(arg) }
       elsif /^@(?<reference_name>.*)/ =~ argument.to_s
-        reference_definition = @container.find(reference_name)
+        reference_definition = @container.find(reference_name, true)
         reference            = reference_definition.object
         raise ScopeWideningInjectionError if reference_definition.scope == :prototype && scope == :container
 

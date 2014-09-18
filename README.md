@@ -154,6 +154,7 @@ services:
     calls:
       - ['transport=', '%mailer.transport%']
     lazy: true
+    public: true
   newsletter:
     class: NewsletterManager
     arguments:
@@ -177,6 +178,10 @@ And here's some more details about each keyword:
 * `lazy`: Returns a Proxy Object if true. The _real_ object will only be instantiated at the first method call.
 
 * `alias`: A string containing the target service name.
+
+* `public`: A boolean indicating whether services can be accessed from the container. 
+  A public service can be accessed normally by calling `container.get('my_service')`.
+  Private services will only be accessible when used as arguments for other services. Services are public by default.
 
 * `scope`: A string containing one of two possibles values to handle the service initialization scope:
   * `container`: a service is initialized only once throughout the container life (default)
