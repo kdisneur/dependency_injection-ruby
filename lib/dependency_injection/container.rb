@@ -15,8 +15,14 @@ module DependencyInjection
       @parameters[name] = value
     end
 
-    def find(name)
-      @definitions[name]
+    def find(name, include_private=false)
+      definition = @definitions[name]
+
+      if definition && definition.public? || include_private
+        return definition
+      end
+
+      nil
     end
 
     def get(name)
